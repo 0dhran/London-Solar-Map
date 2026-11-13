@@ -592,11 +592,12 @@ def review_site(
 
         message = "Review saved."
 
-        save_event = {
-            "toid": toid,
-            "status": status,
-            "event_id": str(uuid4()),
-        }
+        # save_event = {
+        #     "toid": toid,
+        #     "status": status,
+        #     "event_id": str(uuid4()),
+        # }
+        save_event = no_update
 
     else:
         raise PreventUpdate
