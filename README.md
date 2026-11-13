@@ -45,3 +45,14 @@ Potential expansions:
 https://osdatahub.os.uk/data/downloads/open/OpenTOID for the OS map
 
 https://data.london.gov.uk/dataset/london-solar-opportunity-map-lsom-vdxyl for the LSOM data
+
+## Solar Output
+We want Solar peak output (kWp), which is the maximum power output of a solar project. How do we adjudge this? They currently use solar wizard.
+
+Ideal pipeline:
+- Map of buildings in Southwark, with information on Solar Peak: Currently through LSOM which gives Solar Output (kWh pa not kWp). Ideally Solar Wizard. 
+- Contact details of these buildings - land registry? This may just be a human job.. But would be good to filter by building type maybe? 
+- Satellite imagery to check if the roof looks suitable.
+- Way of recording maps
+
+  
