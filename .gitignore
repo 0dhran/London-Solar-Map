@@ -30,3 +30,6 @@ osopentoid_202611_gpkg_tq
 # Operating-system files
 .DS_Store
 Thumbs.db
+
+# Land Registry data
+LandRegistry/*
