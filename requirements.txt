@@ -105,6 +105,7 @@ prometheus_client==0.26.0
 prompt_toolkit==3.0.53
 protobuf==7.36.2
 psutil==7.2.2
+psycopg==3.3.9
 pure_eval==0.2.4
 pycparser==3.12
 pydantic==2.14.2

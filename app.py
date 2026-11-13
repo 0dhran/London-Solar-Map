@@ -17,8 +17,9 @@
 # It isn’t deployed online: other volunteers don’t automatically have access, and it stops being available when the Python server stops.'
 
 # %%
-import sqlite3
-from contextlib import closing
+
+import os
+import psycopg
 from datetime import datetime, timezone
 from uuid import uuid4
 
@@ -45,7 +46,19 @@ from pathlib import Path
 BASE_DIR = Path(__file__).resolve().parent
 
 GPKG_PATH = BASE_DIR / "Southwark" / "southwark_joined_solar.gpkg"
-DB = BASE_DIR / "Review_Database.db"
+DATABASE_URL = os.environ.get("DATABASE_URL")
+
+if not DATABASE_URL:
+    raise RuntimeError(
+        "DATABASE_URL is missing. Set it to your Neon connection string."
+    )
+
+
+def connect_db():
+    return psycopg.connect(
+        DATABASE_URL,
+        connect_timeout=15,
+    )
 
 # %%
 #the joined OS geometry and solar potential data for Southwark
@@ -108,34 +121,42 @@ points = points.set_index(TOID_COLUMN, drop=False)
 # Append-only review history
 # --------------------------------------------------
 
-with closing(sqlite3.connect(DB)) as con:
-    with con:
-        con.execute("""
-            CREATE TABLE IF NOT EXISTS Review_Database (
-                review_id INTEGER PRIMARY KEY AUTOINCREMENT,
-                toid TEXT NOT NULL,
-                status TEXT NOT NULL,
-                comment TEXT NOT NULL,
-                reviewer TEXT NOT NULL,
-                reviewed_at TEXT NOT NULL
-            )
-        """)
+# --------------------------------------------------
+# Append-only review history in Neon/Postgres
+# --------------------------------------------------
+
+with connect_db() as con:
+    con.execute("""
+        CREATE TABLE IF NOT EXISTS review_database (
+            review_id BIGINT GENERATED ALWAYS AS IDENTITY
+                PRIMARY KEY,
+            toid TEXT NOT NULL,
+            status TEXT NOT NULL,
+            comment TEXT NOT NULL,
+            reviewer TEXT NOT NULL,
+            reviewed_at TIMESTAMPTZ NOT NULL
+        )
+    """)
+
+    con.execute("""
+        CREATE INDEX IF NOT EXISTS review_database_toid_review_idx
+        ON review_database (toid, review_id DESC)
+    """)
 
 
 def get_map_points():
-    with closing(sqlite3.connect(DB)) as con:
-        latest_reviews = pd.read_sql_query(
-            """
-            SELECT toid, status
-            FROM Review_Database
-            WHERE review_id IN (
-                SELECT MAX(review_id)
-                FROM Review_Database
-                GROUP BY toid
-            )
-            """,
-            con,
-        )
+    with connect_db() as con:
+        rows = con.execute("""
+            SELECT DISTINCT ON (toid)
+                toid, status
+            FROM review_database
+            ORDER BY toid, review_id DESC
+        """).fetchall()
+
+    latest_reviews = pd.DataFrame(
+        rows,
+        columns=["toid", "status"],
+    )
 
     status_by_toid = latest_reviews.set_index("toid")["status"]
 
@@ -146,8 +167,6 @@ def get_map_points():
         .fillna("Unreviewed")
     )
 
-    # Display older confirmed-status wording consistently.
-    # This does not alter any stored review history.
     map_points["status"] = map_points["status"].replace({
         "Confirmed site": "Confirmed Site/Being Developed",
     })
@@ -156,18 +175,17 @@ def get_map_points():
 
 
 def latest_review(toid):
-    with closing(sqlite3.connect(DB)) as con:
+    with connect_db() as con:
         return con.execute(
             """
             SELECT status, comment, reviewer, reviewed_at
-            FROM Review_Database
-            WHERE toid = ?
+            FROM review_database
+            WHERE toid = %s
             ORDER BY review_id DESC
             LIMIT 1
             """,
-            (toid,),
+            (str(toid),),
         ).fetchone()
-
 
 # --------------------------------------------------
 # Marker and details helpers
@@ -571,24 +589,21 @@ def review_site(
                 no_update,
             )
 
-        with closing(sqlite3.connect(DB)) as con:
-            with con:
-                con.execute(
-                    """
-                    INSERT INTO Review_Database
-                        (toid, status, comment, reviewer, reviewed_at)
-                    VALUES (?, ?, ?, ?, ?)
-                    """,
-                    (
-                        toid,
-                        status,
-                        clean_comment,
-                        reviewer.strip(),
-                        datetime.now(timezone.utc).isoformat(
-                            timespec="seconds"
-                        ),
-                    ),
-                )
+        with connect_db() as con:
+            con.execute(
+                """
+                INSERT INTO review_database
+                    (toid, status, comment, reviewer, reviewed_at)
+                VALUES (%s, %s, %s, %s, %s)
+                """,
+                (
+                    str(toid),
+                    status,
+                    clean_comment,
+                    reviewer.strip(),
+                    datetime.now(timezone.utc),
+                ),
+            )
 
         message = "Review saved."
 
