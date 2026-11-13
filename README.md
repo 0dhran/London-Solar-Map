@@ -41,3 +41,7 @@ Potential expansions:
 
 **Land Registry** 
 
+
+https://osdatahub.os.uk/data/downloads/open/OpenTOID for the OS map
+
+https://data.london.gov.uk/dataset/london-solar-opportunity-map-lsom-vdxyl for the LSOM data
