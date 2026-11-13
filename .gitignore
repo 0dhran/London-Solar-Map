@@ -18,10 +18,10 @@ __pycache__/
 !.env.example
 
 # Local review database and temporary database files
-reviews.db
-reviews.db-journal
-reviews.db-wal
-reviews.db-shm
+Review_Database.db
+Review_Database.db-journal
+Review_Database.db-wal
+Review_Database.db-shm
 
 #too big to upload to GitHub
 LSOM 
