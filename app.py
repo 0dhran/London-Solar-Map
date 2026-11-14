@@ -137,6 +137,15 @@ with connect_db() as con:
             reviewed_at TIMESTAMPTZ NOT NULL
         )
     """)
+    con.execute("""
+        ALTER TABLE review_database
+        ADD COLUMN IF NOT EXISTS address TEXT NOT NULL DEFAULT ''
+    """)
+
+    con.execute("""
+        ALTER TABLE review_database
+        ADD COLUMN IF NOT EXISTS solar_wizard_kwp DOUBLE PRECISION
+    """)
 
     con.execute("""
         CREATE INDEX IF NOT EXISTS review_database_toid_review_idx
@@ -178,7 +187,8 @@ def latest_review(toid):
     with connect_db() as con:
         return con.execute(
             """
-            SELECT status, comment, reviewer, reviewed_at
+            SELECT status, comment, reviewer, reviewed_at,
+                    address, solar_wizard_kwp
             FROM review_database
             WHERE toid = %s
             ORDER BY review_id DESC
@@ -226,7 +236,6 @@ def make_markers(frame):
                 )),
                 fillOpacity=0.9,
                 children=dl.Tooltip(
-                    f"{toid} | "
                     f"{row['area3d_in_potential']:,.0f} m² | "
                     f"Potential: {row['sum_total_potential']:,.0f} | "
                     f"Status: {row['status']}"
@@ -246,7 +255,7 @@ def site_details(toid, row):
     )
 
     details = [
-        html.P(f"TOID: {toid}"),
+        #html.P(f"TOID: {toid}"),
         html.P(
             f"Roof area: {row['area3d_in_potential']:,.0f} m²"
         ),
@@ -255,14 +264,14 @@ def site_details(toid, row):
         ),
     ]
 
-    if "avg_tilt" in row.index:
-        details.append(
-            html.P(f"Average roof tilt: {row['avg_tilt']}")
-        )
+    # if "avg_tilt" in row.index:
+    #     details.append(
+    #         html.P(f"Average roof tilt: {row['avg_tilt']}")
+    #     )
 
-    if "lidar_date" in row.index:
+    if "lidar_date" in row.index and pd.notna(row["lidar_date"]):
         details.append(
-            html.P(f"LiDAR date: {row['lidar_date']}")
+            html.P(f"LiDAR year: {int(row['lidar_date'])}")
         )
 
     details.extend([
@@ -277,6 +286,16 @@ def site_details(toid, row):
             "Open Google Maps",
             href=maps_url,
             target="_blank",
+            rel="noopener noreferrer",
+        ),
+
+        html.Br(),
+
+        html.A(
+            "Open Solar Wizard",
+            href="https://solarwizard.org.uk/wizard",
+            target="_blank",
+            rel="noopener noreferrer",
         ),
     ])
 
@@ -360,6 +379,24 @@ app.layout = html.Div([
                 options=list(STATUS_LAYERS),
                 value="Unreviewed",
                 clearable=False,
+            ),
+
+            html.Label("Site address"),
+            dcc.Input(
+                id="review-address",
+                type="text",
+                placeholder="Building name, street and postcode",
+                style={"width": "100%"},
+            ),
+
+            html.Label("Solar Wizard peak capacity (kWp)"),
+            dcc.Input(
+                id="review-solar-kwp",
+                type="number",
+                min=0,
+                step="any",
+                placeholder="Enter capacity in kWp",
+                style={"width": "100%"},
             ),
 
             html.Label("Your name"),
@@ -506,6 +543,8 @@ def refresh_map(save_event, layer_toids):
     Output("save-review", "disabled"),
     Output("save-message", "children"),
     Output("review-saved-event", "data"),
+    Output("review-address", "value"),
+    Output("review-solar-kwp", "value"),
 
     Input({"type": "site", "toid": ALL}, "n_clicks"),
     Input("save-review", "n_clicks"),
@@ -515,6 +554,8 @@ def refresh_map(save_event, layer_toids):
     State("review-status", "value"),
     State("review-comment", "value"),
     State("reviewer", "value"),
+    State("review-address", "value"),
+    State("review-solar-kwp", "value"),
 
     prevent_initial_call=True,
 )
@@ -526,6 +567,8 @@ def review_site(
     status,
     comment,
     reviewer,
+    address,
+    solar_kwp,
 ):
     trigger = ctx.triggered_id
     message = ""
@@ -593,8 +636,16 @@ def review_site(
             con.execute(
                 """
                 INSERT INTO review_database
-                    (toid, status, comment, reviewer, reviewed_at)
-                VALUES (%s, %s, %s, %s, %s)
+                    (
+                        toid,
+                        status,
+                        comment,
+                        reviewer,
+                        reviewed_at,
+                        address,
+                        solar_wizard_kwp
+                    )
+                VALUES (%s, %s, %s, %s, %s, %s, %s)
                 """,
                 (
                     str(toid),
@@ -602,6 +653,8 @@ def review_site(
                     clean_comment,
                     reviewer.strip(),
                     datetime.now(timezone.utc),
+                    (address or "").strip(),
+                    float(solar_kwp) if solar_kwp is not None else None,
                 ),
             )
 
@@ -633,6 +686,8 @@ def review_site(
         False,
         message,
         save_event,
+        (saved[4] or "") if saved else "",
+        saved[5] if saved else None,
     )
 
 
