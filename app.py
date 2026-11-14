@@ -36,7 +36,8 @@ from dash import (
 )
 from dash.exceptions import PreventUpdate
 from pathlib import Path
-
+import requests
+from functools import lru_cache
 
 # %% [markdown]
 # Filtering southwark sites by criteria:
@@ -245,9 +246,43 @@ def make_markers(frame):
 
     return markers
 
+@lru_cache(maxsize=2048)
+def nearby_postcode(latitude, longitude):
+    try:
+        response = requests.get(
+            "https://api.postcodes.io/postcodes",
+            params={
+                "lat": latitude,
+                "lon": longitude,
+                "limit": 1,
+                "radius": 500,
+            },
+            timeout=5,
+        )
+        response.raise_for_status()
 
+        results = response.json().get("result") or []
+
+        if not results:
+            return None
+
+        match = results[0]
+
+        return (
+            match["postcode"],
+            match["distance"],
+        )
+
+    except (requests.RequestException, ValueError, KeyError):
+        return None
+    
 def site_details(toid, row):
     saved = latest_review(toid)
+
+    postcode_match = nearby_postcode(
+        float(row.geometry.y),
+        float(row.geometry.x),
+    )
 
     maps_url = (
         "https://www.google.com/maps/search/?api=1"
@@ -273,7 +308,20 @@ def site_details(toid, row):
         details.append(
             html.P(f"LiDAR year: {int(row['lidar_date'])}")
         )
+    if postcode_match:
+        postcode, distance = postcode_match
 
+        details.append(
+            html.P(
+                f"Nearby postcode: {postcode} "
+                f"(postcode location {distance:.0f} m away; "
+                "check the correct building)"
+            )
+        )
+    else:
+        details.append(
+            html.P("Nearby postcode lookup unavailable.")
+        )
     details.extend([
         html.P(
             f"Saved status: {saved[0] if saved else 'Unreviewed'}"
