@@ -64,7 +64,11 @@ MAy be meeting with Chris Grundy of LSHTM. Not sure the best way to do this, lik
 I reckon a case-study, just documenting how effective it's been - probably mentioning changes in effectiveness, and maybe going into other things. Perplexity recommended formally testing if the search quality decreased which seems overkill right now since we're not operating at full capacity. 
 
 ## To-Do
-
+Make it more robust, and load quicker
+Refine the process more, only record necessary info
+Extend to the rest of London
+Start recording lists of potential sites (building up evidence - maybe talk to someone in CEE/CEL/GLA to see how beneficial it would be to do this. Makes a clear business case for commercial properties e.g. Morrison's, you own X properties, your potential is Y, this is how much you could save and your community benefit is Z; or for local and central gov - if we introduce a bill that companies have to engage with community energy then we could see an increase of W in local decarbonisation/fuel poverty/energy security.) Will ask about this
+Look into automation with Machine Vision
 
 
 ### Question List
