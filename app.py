@@ -359,6 +359,71 @@ west, south, east, north = points.total_bounds
 app = Dash(__name__)
 server = app.server
 
+
+def data_sources_panel():
+    def link(label, url):
+        return html.A(label, href=url, target="_blank", rel="noopener noreferrer")
+
+    return html.Div([
+        html.P([
+            "Solar data: Greater London Authority / UCL London Solar Opportunity Map. ",
+            "Locations: Ordnance Survey OS Open TOID. ",
+            html.A("Data sources & licences", href="#data-sources"),
+        ], style={"marginBottom": "8px"}),
+        html.Details([
+            html.Summary("Data sources, licences & limitations"),
+            html.P("Draft research tool developed by Odhrán Dooley for Southwark Community Energy. "
+                   "Screening results are indicative, not engineering or legal assessments. "
+                   "Acknowledgement does not imply endorsement by data providers."),
+            html.H4("London Solar Opportunity Map (LSOM)"),
+            html.P("Source: Greater London Authority, developed with UCL Energy Institute and "
+                   "UCL Centre for Advanced Spatial Analysis. Used for roof-area and solar-potential "
+                   "estimates, filtered and joined to locations using TOIDs. The published dataset "
+                   "lists Open Government Licence v3 and the notice: "
+                   "© Crown copyright and database rights 2023."),
+            html.P([
+                link("LSOM dataset and notices", "https://data.london.gov.uk/dataset/london-solar-opportunity-map-lsom-vdxyl"),
+                " | ", link("Open Government Licence v3", "https://www.nationalarchives.gov.uk/doc/open-government-licence/version/3/"),
+            ]),
+            html.P("LSOM potential is not installed peak capacity (kWp). The raw potential uses a "
+                   "100% utilisation assumption; LSOM's public-map assumption is 11.9%. "
+                   "The publisher describes 2017 building outlines and LiDAR collected between "
+                   "2006 and 2016. Check each record's LiDAR year; later changes may be absent."),
+            html.H4("Ordnance Survey OS Open TOID"),
+            html.P("Used for generalised feature locations linked by TOID, not building footprints. "
+                   "Licensed under Open Government Licence v3. Contains OS data © Crown copyright "
+                   "and database right. See the original download for the applicable copyright year "
+                   "and any additional notices."),
+            html.P(link("OS Open TOID", "https://www.ordnancesurvey.co.uk/products/os-open-toid")),
+            html.H4("Satellite imagery"),
+            html.P("Esri World Imagery and its credited imagery providers supply the background. "
+                   "Provider attribution is displayed on the map. Imagery is not distributed under "
+                   "this project's software licence."),
+            html.H4("Nearby postcode lookup"),
+            html.P(["Postcode lookup is supplied by ", link("Postcodes.io", "https://postcodes.io/"),
+                    ". The nearest postcode is a navigation aid, not a verified building address. ",
+                    link("Postcodes.io data sources and licences", "https://postcodes.io/about/"), "."]),
+            html.H4("External review tools and ownership research"),
+            html.P([
+                link("Google Maps", "https://www.google.com/maps"), "; ",
+                link("Solar Wizard", "https://solarwizard.org.uk/wizard"), "; ",
+                link("LandExplorer", "https://landexplorer.coop/"), "; ",
+                link("Carbon & Place Land Ownership Explorer", "https://www.carbon.place/landownership/"),
+                ". External tools have their own terms. Listing them does not mean their data "
+                "is embedded, licensed for extraction, or endorsed for this workflow.",
+            ]),
+            html.P("HM Land Registry INSPIRE, CCOD and OCOD are not loaded directly by this dashboard "
+                   "script. Any separate processing or recorded ownership findings must retain "
+                   "their source, date and applicable licence notices. Permission to store, publish "
+                   "or use ownership findings for outreach must be checked separately."),
+            html.H4("Software and data licences are separate"),
+            html.P("Any open-source licence for this project's original code does not override "
+                   "third-party data, imagery, API or software terms. Preserve the original "
+                   "dataset notices with exports. Review statuses and comments are volunteer "
+                   "assessments, not confirmation of ownership or solar feasibility."),
+        ], id="data-sources", style={"lineHeight": "1.5"}),
+    ], style={"padding": "12px 16px", "borderTop": "1px solid #ddd", "fontSize": "14px"})
+
 app.layout = html.Div([
     html.H2("Community Energy — Site Screening"),
 
@@ -380,6 +445,7 @@ app.layout = html.Div([
                         "DigitalGlobe, GeoEye, i-cubed, USDA FSA, "
                         "USGS, AEX, Getmapping, Aerogrid, IGN, "
                         "IGP, swisstopo, and the GIS User Community"
+                        " | Contains OS data &copy; Crown copyright and database right"
                     ),
                 ),
 
@@ -478,6 +544,7 @@ app.layout = html.Div([
             "boxSizing": "border-box",
         }),
     ], style={"display": "flex"}),
+    data_sources_panel(),
 ])
 
 
