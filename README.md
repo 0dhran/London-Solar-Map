@@ -62,5 +62,10 @@ Would be good to just get a classification algorithm to look at a roof and do th
 MAy be meeting with Chris Grundy of LSHTM. Not sure the best way to do this, like it can be purely technical, or could be more about the impact of the tool on process in CES (in a public health way?). Maybe try frame it as 'can the use of machine learning have a positive public health effect?' 
 
 I reckon a case-study, just documenting how effective it's been - probably mentioning changes in effectiveness, and maybe going into other things. Perplexity recommended formally testing if the search quality decreased which seems overkill right now since we're not operating at full capacity. 
-  
+
+## To-Do
+
+
+
+### Question List
 [**Q** Can we get Smart Meter data to identify places with high daily electricity use that may map up well with solar profiles.]
