@@ -45,11 +45,13 @@ The user so can click on a point, its information comes up on the side panel, th
 Potential expansions:
 - Abandon LSOM for OpenStreetMap or similar (buildings) to avoid Ordnance Survey copyright issues with making open source. Requires creating our own model of solar opportunity.
 
+## Appendices
+### Data Sources
 https://osdatahub.os.uk/data/downloads/open/OpenTOID for the OS map
 
 https://data.london.gov.uk/dataset/london-solar-opportunity-map-lsom-vdxyl for the LSOM data
 
-## A note on Solar Output
+### A note on Solar Output
 We want Solar peak output (kWp), which is the maximum power output of a solar project. How do we adjudge this? They currently use solar wizard.
 
 May be a way to translate from LSOM.
