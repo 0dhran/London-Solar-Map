@@ -345,6 +345,38 @@ def site_details(toid, row):
             target="_blank",
             rel="noopener noreferrer",
         ),
+        html.Br(),
+        html.A(
+            "Open LandExplorer (sign-in required)",
+            href="https://landexplorer.coop/",
+            target="_blank",
+            rel="noopener noreferrer",
+        ),
+
+        html.P(
+            "Sign in, enable Land Ownership → All Properties, "
+            "then paste the postcode into the search box. "
+            "If you cannot check ownership, note "
+            "'Ownership check needed' in your review.",
+            style={"fontSize": "13px", "color": "#555"},
+        ),
+
+        html.Div([
+            html.Span("Coordinates: "),
+            html.Code(
+                f"{row.geometry.y:.6f}, {row.geometry.x:.6f}",
+                id="landexplorer-coordinates",
+            ),
+            dcc.Clipboard(
+                target_id="landexplorer-coordinates",
+                title="Copy coordinates",
+                style={
+                    "display": "inline-block",
+                    "marginLeft": "8px",
+                    "cursor": "pointer",
+                },
+            ),
+        ]),
     ])
 
     return details
