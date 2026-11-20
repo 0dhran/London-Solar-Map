@@ -59,9 +59,7 @@ May be a way to translate from LSOM.
 Would be good to just get a classification algorithm to look at a roof and do this for us rather than relying on old LSOM data.
 
 ### Framing as an academic paper : 
-MAy be meeting with Chris Grundy of LSHTM. Not sure the best way to do this, like it can be purely technical, or could be more about the impact of the tool on process in CES (in a public health way?). Maybe try frame it as 'can the use of machine learning have a positive public health effect?' 
-
-I reckon a case-study, just documenting how effective it's been - probably mentioning changes in effectiveness, and maybe going into other things. Perplexity recommended formally testing if the search quality decreased which seems overkill right now since we're not operating at full capacity. 
+MAy be meeting with Chrissy Roberst of LSHTM. I think I would like to frame it as either a simple evaluation case-study (how much has it improved operations for Southwark CE), or more interestingly using machine vision and AI to quantify the potential of private/commercial premises for rooftop solar and how this could be unlocked by policy (LSE-ish? GFI? UCL Energy institute?)
 
 ## To-Do
 Make it more robust, and load quicker
